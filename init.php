@@ -197,7 +197,7 @@ class Af_Img_Phash extends Plugin {
 		$this->host->set($this, "enabled_feeds", $enabled_feeds);
 	}
 
-	private function rewrite_duplicate(DOMDocument $doc, DOMNode $elem, bool $api_mode = false) {
+	private function rewrite_duplicate(DOMDocument $doc, DOMElement $elem, bool $api_mode = false) {
 
 		if ($elem->hasAttribute("src")) {
 			$uri = validate_url($elem->getAttribute("src"));
@@ -205,6 +205,7 @@ class Af_Img_Phash extends Plugin {
 		} else if ($elem->hasAttribute("poster")) {
 			$check_uri = validate_url($elem->getAttribute("poster"));
 
+			/** @var DOMElement|false */
 			$video_source = $elem->getElementsByTagName("source")->item(0);
 
 			if ($video_source) {
@@ -331,6 +332,7 @@ class Af_Img_Phash extends Plugin {
 								_debug("phash: calculated perceptual hash: $hash");
 
 								// we managed to process this image, it should be safe to remove the flag now
+								// @phpstan-ignore-next-line
 								if ($this->cache->is_writable() && $this->cache->exists($cached_file_flag))
 									unlink($this->cache->get_full_path($cached_file_flag));
 
