@@ -8,9 +8,15 @@ class Af_Img_Phash extends Plugin {
 
 	/** @var PluginHost $host */
 	private $host;
+
+	/** @var string */
 	private $default_domains_list = "imgur.com reddituploads.com pbs.twimg.com .redd.it i.sli.mg media.tumblr.com redditmedia.com kek.gg gfycat.com";
+
+	/** @var int */
 	private $default_similarity = 5;
-	private $data_max_age = 30; // days
+
+	/** @var int (days) */
+	private $data_max_age = 30;
 
 	/** @var DiskCache $cache */
 	private $cache;
@@ -31,7 +37,7 @@ class Af_Img_Phash extends Plugin {
 		return file_get_contents(__DIR__ . "/init.css");
 	}
 
-	function save() {
+	function save() : void {
 		$similarity = (int) $_POST["similarity"];
 		$domains_list = $_POST["domains_list"];
 
@@ -170,12 +176,14 @@ class Af_Img_Phash extends Plugin {
 		<?php
 	}
 
-	private function get_stored_array($name) {
-		$tmp = $this->host->get($this, $name);
-
-		if (!is_array($tmp)) $tmp = [];
-
-		return $tmp;
+	/**
+	 * @param string $name
+	 * @return array<string|int>
+	 * @throws PDOException
+	 * @deprecated
+	 */
+	private function get_stored_array(string $name) : array {
+		return $this->host->get_array($this, $name);
 	}
 
 	function hook_prefs_save_feed($feed_id) {
@@ -197,7 +205,7 @@ class Af_Img_Phash extends Plugin {
 		$this->host->set($this, "enabled_feeds", $enabled_feeds);
 	}
 
-	private function rewrite_duplicate(DOMDocument $doc, DOMElement $elem, bool $api_mode = false) {
+	private function rewrite_duplicate(DOMDocument $doc, DOMElement $elem, bool $api_mode = false) : void {
 
 		if ($elem->hasAttribute("src")) {
 			$uri = validate_url($elem->getAttribute("src"));
@@ -372,7 +380,12 @@ class Af_Img_Phash extends Plugin {
 		return 2;
 	}
 
-	private function filter_unknown_feeds($enabled_feeds) {
+	/**
+	 * @param array<int> $enabled_feeds
+	 * @return array<int>
+	 * @throws PDOException
+	 */
+	private function filter_unknown_feeds(array $enabled_feeds) : array {
 		$tmp = array();
 
 		foreach ($enabled_feeds as $feed) {
@@ -497,7 +510,12 @@ class Af_Img_Phash extends Plugin {
 			WHERE created_at < ".$this->interval_days($this->data_max_age));
 	}
 
-	private function check_src_domain($src, $domains_list) {
+	/**
+	 * @param string $src
+	 * @param array<string> $domains_list
+	 * @return bool
+	 */
+	private function check_src_domain(string $src, array $domains_list) : bool {
 		$src_domain = parse_url($src, PHP_URL_HOST);
 
 		foreach ($domains_list as $domain) {
@@ -509,7 +527,7 @@ class Af_Img_Phash extends Plugin {
 		return false;
 	}
 
-	private function guid_to_article_title($article_guid, $owner_uid) {
+	private function guid_to_article_title(string $article_guid, int $owner_uid) : string {
 		$sth = $this->pdo->prepare("SELECT feed_id, title, updated
 			FROM ttrss_entries, ttrss_user_entries
 			WHERE ref_id = id AND
@@ -534,7 +552,7 @@ class Af_Img_Phash extends Plugin {
 		return $article_title;
 	}
 
-	function showsimilar() {
+	function showsimilar() : void {
 		$url = $_REQUEST["url"];
 		$owner_uid = $_SESSION["uid"];
 		$similarity = (int) $this->host->get($this, "similarity", $this->default_similarity);
@@ -640,7 +658,7 @@ class Af_Img_Phash extends Plugin {
 		<?php
 	}
 
-	private function interval_days($days) {
+	private function interval_days(int $days) : string {
 		if (Config::get(Config::DB_TYPE) == "pgsql") {
 			return "NOW() - INTERVAL '$days days' ";
 		} else {
@@ -648,7 +666,7 @@ class Af_Img_Phash extends Plugin {
 		}
 	}
 
-	private function bitcount_func($phash) {
+	private function bitcount_func(string $phash) : string {
 		if (Config::get(Config::DB_TYPE) == "pgsql") {
 			return Config::get("IMG_HASH_SQL_FUNCTION") ? "bit_count('$phash' # phash)" : "unique_1bits('$phash', phash)";
 		} else {
