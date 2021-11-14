@@ -389,24 +389,29 @@ class Af_Img_Phash extends Plugin {
 	}
 
 	function hook_render_article($article) {
-		return $this->hook_render_article_cdm($article);
+		return $this->_hook_render_article_cdm($article, false);
 	}
 
 	function hook_render_article_api($row) {
 		$article = isset($row['headline']) ? $row['headline'] : $row['article'];
 
-		return $this->hook_render_article_cdm($article, true);
+		return $this->_hook_render_article_cdm($article, true);
 	}
 
-	function hook_article_image($enclosures, $content, $site_url) {
+	function hook_article_image($enclosures, $content, $site_url, $article) {
 		// fake guid because of further checking in hook_render_article_cdm() which we don't need here
-		$article = $this->hook_render_article_cdm(["guid" => time(), "content" => $content], true);
+		$article = $this->_hook_render_article_cdm(["guid" => time(), "content" => $content], true);
 
 		return ["", "", $article["content"]];
 	}
 
-	function hook_render_article_cdm($article, $api_mode = false) {
-
+	/** we can't freely screw around with hook argument lists anymore
+	 * @param array<string,mixed> $article
+	 * @param bool $api_mode
+	 * @return array<string,mixed>
+	 * @throws PDOException
+	 */
+	private function _hook_render_article_cdm($article, $api_mode) {
 		/* if (Config::get(Config::DB_TYPE) == "pgsql" && !Config::get("IMG_HASH_SQL_FUNCTION")) {
 			try { $res = $this->pdo->query("select 'unique_1bits'::regproc"); } catch (PDOException $e) { ; }
 			if (empty($res) || !$res->fetch()) return $article;
@@ -481,6 +486,10 @@ class Af_Img_Phash extends Plugin {
 		if ($need_saving) $article["content"] = $doc->saveXML();
 
 		return $article;
+	}
+
+	function hook_render_article_cdm($article) {
+		return $this->_hook_render_article_cdm($article, false);
 	}
 
 	function hook_house_keeping() {
