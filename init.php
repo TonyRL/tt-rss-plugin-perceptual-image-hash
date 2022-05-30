@@ -26,7 +26,7 @@ class Af_Img_Phash extends Plugin {
 			"Filter duplicate images using perceptual hashing (requires GD)",
 			"fox",
 			false,
-			"https://git.tt-rss.org/fox/ttrss-perceptual-image-hash/wiki");
+			"https://dev.tt-rss.org/fox/ttrss-perceptual-image-hash/wiki");
 	}
 
 	function get_js() {
