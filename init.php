@@ -319,8 +319,6 @@ class Af_Img_Phash extends Plugin {
 								continue;
 							}
 
-							$this->cache->touch($cached_file_flag);
-
 							// check for local cache
 							if (!$this->cache->exists($cached_file)) {
 								$data = fetch_file_contents(array("url" => $src, "max_size" => Config::get(Config::MAX_CACHE_FILE_SIZE)));
