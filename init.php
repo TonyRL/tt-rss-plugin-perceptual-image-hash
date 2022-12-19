@@ -54,7 +54,7 @@ class Af_Img_Phash extends Plugin {
 
 	function init($host) {
 		$this->host = $host;
-		$this->cache = new DiskCache("images");
+		$this->cache = DiskCache::instance("images");
 
 		Config::add("IMG_HASH_SQL_FUNCTION", "");
 
