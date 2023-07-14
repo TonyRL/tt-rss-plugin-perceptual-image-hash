@@ -9,9 +9,6 @@ class Af_Img_Phash extends Plugin {
 	/** @var PluginHost $host */
 	private $host;
 
-	/** @var string */
-	private $default_domains_list = "imgur.com reddituploads.com pbs.twimg.com .redd.it i.sli.mg media.tumblr.com redditmedia.com kek.gg gfycat.com";
-
 	/** @var int */
 	private $default_similarity = 5;
 
@@ -95,7 +92,6 @@ class Af_Img_Phash extends Plugin {
 			}
 
 			$similarity = (int) $this->host->get($this, "similarity", $this->default_similarity);
-			$domains_list = $this->host->get($this, "domains_list", $this->default_domains_list);
 			$enable_globally = $this->host->get($this, "enable_globally");
 
 			?>
@@ -112,12 +108,6 @@ class Af_Img_Phash extends Plugin {
 						})
 					}
 				</script>
-
-				<fieldset>
-					<label><?= $this->__( "Limit to domains (space-separated):") ?></label>
-					<textarea dojoType='dijit.form.SimpleTextarea' style='height: 100px; width: 500px; display: block'
-						required='1' name='domains_list'><?= $domains_list ?></textarea>
-				</fieldset>
 
 				<fieldset>
 					<label><?= $this->__( "Maximum Hamming distance:") ?></label>
@@ -143,7 +133,7 @@ class Af_Img_Phash extends Plugin {
 
 			<?php
 			$enabled_feeds = $this->filter_unknown_feeds(
-				$this->get_stored_array("enabled_feeds"));
+				$this->host->get_array($this, "enabled_feeds"));
 
 			$this->host->set($this, "enabled_feeds", $enabled_feeds);
 
@@ -163,7 +153,7 @@ class Af_Img_Phash extends Plugin {
 	}
 
 	function hook_prefs_edit_feed($feed_id) {
-		$enabled_feeds = $this->get_stored_array("enabled_feeds");
+		$enabled_feeds = $this->host->get_array($this, "enabled_feeds");
 		?>
 		<header><?= $this->__( "Similar images") ?></header>
 		<section>
@@ -176,18 +166,8 @@ class Af_Img_Phash extends Plugin {
 		<?php
 	}
 
-	/**
-	 * @param string $name
-	 * @return array<string|int>
-	 * @throws PDOException
-	 * @deprecated
-	 */
-	private function get_stored_array(string $name) : array {
-		return $this->host->get_array($this, $name);
-	}
-
 	function hook_prefs_save_feed($feed_id) {
-		$enabled_feeds = $this->get_stored_array("enabled_feeds");
+		$enabled_feeds = $this->host->get_array($this, "enabled_feeds");
 
 		$enable = checkbox_to_sql_bool($_POST["phash_similarity_enabled"] ?? "");
 		$key = array_search($feed_id, $enabled_feeds);
@@ -208,10 +188,10 @@ class Af_Img_Phash extends Plugin {
 	private function rewrite_duplicate(DOMDocument $doc, DOMElement $elem, bool $api_mode = false) : void {
 
 		if ($elem->hasAttribute("src")) {
-			$uri = validate_url($elem->getAttribute("src"));
+			$uri = UrlHelper::validate($elem->getAttribute("src"));
 			$check_uri = $uri;
 		} else if ($elem->hasAttribute("poster")) {
-			$check_uri = validate_url($elem->getAttribute("poster"));
+			$check_uri = UrlHelper::validate($elem->getAttribute("poster"));
 
 			/** @var DOMElement|false */
 			$video_source = $elem->getElementsByTagName("source")->item(0);
@@ -247,7 +227,7 @@ class Af_Img_Phash extends Plugin {
 				$a = $doc->createElement("a");
 				$a->setAttribute("href", "#");
 				$a->setAttribute("onclick", "Plugins.Af_Img_Phash.showSimilar(this)");
-				$a->setAttribute("data-check-url", validate_url($check_uri));
+				$a->setAttribute("data-check-url", UrlHelper::validate($check_uri));
 				$a->appendChild(new DOMText("(similar)"));
 
 				$sum->appendChild(new DOMText(" "));
@@ -262,15 +242,10 @@ class Af_Img_Phash extends Plugin {
 	function hook_article_filter($article) {
 
 		$enable_globally = $this->host->get($this, "enable_globally");
-		$domains_list = $this->host->get($this, "domains_list");
-
-		if (!$domains_list) $domains_list = $this->default_domains_list;
-
-		$domains_list = explode(" ", $domains_list);
 
 		if (!$enable_globally) {
 			if (!in_array($article["feed"]["id"],
-					$this->get_stored_array("enabled_feeds"))) {
+					$this->host->get_array($this, "enabled_feeds"))) {
 
 				return $article;
 			}
@@ -289,86 +264,82 @@ class Af_Img_Phash extends Plugin {
 			foreach ($imgs as $img) {
 
 				$src = $img->tagName == "video" ? $img->getAttribute("poster") : $img->getAttribute("src");
-				$src = validate_url(rewrite_relative_url($article["link"], $src));
+				$src = UrlHelper::validate(UrlHelper::rewrite_relative($article["link"], $src));
 
-				$domain_found = $this->check_src_domain($src, $domains_list);
+				Debug::log("phash: checking $src", Debug::LOG_VERBOSE);
 
-				if ($domain_found) {
+				$sth = $this->pdo->prepare("SELECT id FROM ttrss_plugin_img_phash_urls WHERE
+					owner_uid = ? AND url = ? LIMIT 1");
+				$sth->execute([$owner_uid, $src]);
 
-					_debug("phash: checking $src");
+				if ($sth->fetch()) {
+					Debug::log("phash: url already stored, not processing", Debug::LOG_VERBOSE);
+					continue;
+				} else {
+					Debug::log("phash: processing URL...", Debug::LOG_VERBOSE);
 
-					$sth = $this->pdo->prepare("SELECT id FROM ttrss_plugin_img_phash_urls WHERE
-						owner_uid = ? AND url = ? LIMIT 1");
-					$sth->execute([$owner_uid, $src]);
+					$cached_file = sha1($src);
+					$cached_file_flag = "$cached_file.phash-flag";
 
-					if ($sth->fetch()) {
-						_debug("phash: url already stored, not processing");
-						continue;
-					} else {
+					if ($this->cache->is_writable()) {
 
-						_debug("phash: downloading and calculating hash...");
-
-						$cached_file = sha1($src);
-						$cached_file_flag = "$cached_file.phash-flag";
-
-						if ($this->cache->is_writable()) {
-
-							// check for .flag & create it
-							if ($this->cache->exists($cached_file_flag)) {
-								_debug("phash: $cached_file_flag exists, looks like we failed on this URL before; skipping.");
-								continue;
-							}
-
-							// check for local cache
-							if (!$this->cache->exists($cached_file)) {
-								$data = fetch_file_contents(array("url" => $src, "max_size" => Config::get(Config::MAX_CACHE_FILE_SIZE)));
-
-								if ($data) {
-									$this->cache->put($cached_file, $data);
-								}
-							}
-
-							if ($this->cache->exists($cached_file)) {
-
-								$implementation = new PerceptualHash();
-								$hasher = new ImageHash($implementation);
-
-								$hash = (string)$hasher->hash($this->cache->get_full_path($cached_file));
-
-								_debug("phash: calculated perceptual hash: $hash");
-
-								// we managed to process this image, it should be safe to remove the flag now
-								// @phpstan-ignore-next-line
-								if ($this->cache->is_writable() && $this->cache->exists($cached_file_flag))
-									unlink($this->cache->get_full_path($cached_file_flag));
-
-								if ($hash) {
-									$hash = base_convert($hash, 16, 10);
-
-									if (PHP_INT_SIZE > 4) {
-										while ($hash > PHP_INT_MAX) {
-											$bitstring = base_convert($hash, 10, 2);
-											$bitstring = substr($bitstring, 1);
-
-											$hash = base_convert($bitstring, 2, 10);
-										}
-									}
-
-									$sth = $this->pdo->prepare("INSERT INTO
-										ttrss_plugin_img_phash_urls (url, article_guid, owner_uid, phash) VALUES
-										(?, ?, ?, ?)");
-									$sth->execute([$src, $article_guid, $owner_uid, $hash]);
-								}
-							}
-
-						} else {
-							_debug("phash: cache directory is not writable");
-							return $article;
+						// check for .flag & create it
+						if ($this->cache->exists($cached_file_flag)) {
+							Debug::log("phash: $cached_file_flag exists, looks like we failed on this URL before; skipping.", Debug::LOG_VERBOSE);
+							continue;
 						}
+
+						// check for local cache
+						if (!$this->cache->exists($cached_file)) {
+							Debug::log("phash: downloading URL...", Debug::LOG_VERBOSE);
+
+							$data = UrlHelper::fetch(["url" => $src, "max_size" => Config::get(Config::MAX_CACHE_FILE_SIZE)]);
+
+							if ($data) {
+								$this->cache->put($cached_file, $data);
+							}
+						}
+
+						if ($this->cache->exists($cached_file)) {
+							Debug::log("phash: using local cache...", Debug::LOG_VERBOSE);
+
+							$implementation = new PerceptualHash();
+							$hasher = new ImageHash($implementation);
+
+							$hash = (string)$hasher->hash($this->cache->get_full_path($cached_file));
+
+							Debug::log("phash: calculated perceptual hash: $hash", Debug::LOG_VERBOSE);
+
+							// we managed to process this image, it should be safe to remove the flag now
+							// @phpstan-ignore-next-line
+							if ($this->cache->is_writable() && $this->cache->exists($cached_file_flag))
+								unlink($this->cache->get_full_path($cached_file_flag));
+
+							if ($hash) {
+								$hash = base_convert($hash, 16, 10);
+
+								if (PHP_INT_SIZE > 4) {
+									while ($hash > PHP_INT_MAX) {
+										$bitstring = base_convert($hash, 10, 2);
+										$bitstring = substr($bitstring, 1);
+
+										$hash = base_convert($bitstring, 2, 10);
+									}
+								}
+
+								$sth = $this->pdo->prepare("INSERT INTO
+									ttrss_plugin_img_phash_urls (url, article_guid, owner_uid, phash) VALUES
+									(?, ?, ?, ?)");
+								$sth->execute([$src, $article_guid, $owner_uid, $hash]);
+							}
+						}
+
+					} else {
+						Debug::log("phash: cache directory is not writable", Debug::LOG_VERBOSE);
+						return $article;
 					}
 				}
 			}
-
 		}
 
 		return $article;
@@ -429,7 +400,6 @@ class Af_Img_Phash extends Plugin {
 		} */
 
 		$owner_uid = $_SESSION["uid"];
-		$domains_list = explode(" ", $this->host->get($this, "domains_list", $this->default_domains_list));
 		$similarity = (int) $this->host->get($this, "similarity", $this->default_similarity);
 
 		$doc = new DOMDocument();
@@ -443,51 +413,47 @@ class Af_Img_Phash extends Plugin {
 			foreach ($imgs as $img) {
 
 				$src = $img->tagName == "video" ? $img->getAttribute("poster") : $img->getAttribute("src");
-				$src = validate_url(rewrite_relative_url($article["link"] ?? "", $src));
+				$src = UrlHelper::validate(UrlHelper::rewrite_relative($article["link"] ?? "", $src));
 
-				$domain_found = $this->check_src_domain($src, $domains_list);
+				// check for URL duplicates first
 
-				if ($domain_found) {
-					// check for URL duplicates first
-
-					$sth = $this->pdo->prepare("SELECT id FROM ttrss_plugin_img_phash_urls WHERE
-							owner_uid = ? AND
-							url = ? AND
-							article_guid != ? LIMIT 1");
-					$sth->execute([$owner_uid, $src, $article_guid]);
-
-					if ($sth->fetch()) {
-						$need_saving = true;
-						$this->rewrite_duplicate($doc, $img, $api_mode);
-						continue;
-					}
-
-					// check using perceptual hash duplicates
-
-					$sth = $this->pdo->prepare("SELECT phash FROM ttrss_plugin_img_phash_urls WHERE
+				$sth = $this->pdo->prepare("SELECT id FROM ttrss_plugin_img_phash_urls WHERE
 						owner_uid = ? AND
-						url = ? LIMIT 1");
-					$sth->execute([$owner_uid, $src]);
+						url = ? AND
+						article_guid != ? LIMIT 1");
+				$sth->execute([$owner_uid, $src, $article_guid]);
+
+				if ($sth->fetch()) {
+					$need_saving = true;
+					$this->rewrite_duplicate($doc, $img, $api_mode);
+					continue;
+				}
+
+				// check using perceptual hash duplicates
+
+				$sth = $this->pdo->prepare("SELECT phash FROM ttrss_plugin_img_phash_urls WHERE
+					owner_uid = ? AND
+					url = ? LIMIT 1");
+				$sth->execute([$owner_uid, $src]);
+
+				if ($row = $sth->fetch()) {
+					$phash = $row['phash'];
+
+					//$similarity = 15;
+
+					$sth = $this->pdo->prepare("SELECT article_guid FROM ttrss_plugin_img_phash_urls WHERE
+						owner_uid = ? AND
+						created_at >= ".$this->interval_days($this->data_max_age)." AND
+						".$this->bitcount_func($phash)." <= ? ORDER BY created_at LIMIT 1");
+					$sth->execute([$owner_uid, $similarity]);
 
 					if ($row = $sth->fetch()) {
-						$phash = $row['phash'];
 
-						//$similarity = 15;
+						$test_guid = $row['article_guid'];
 
-						$sth = $this->pdo->prepare("SELECT article_guid FROM ttrss_plugin_img_phash_urls WHERE
-							owner_uid = ? AND
-							created_at >= ".$this->interval_days($this->data_max_age)." AND
-							".$this->bitcount_func($phash)." <= ? ORDER BY created_at LIMIT 1");
-						$sth->execute([$owner_uid, $similarity]);
-
-						if ($row = $sth->fetch()) {
-
-							$test_guid = $row['article_guid'];
-
-							if ($test_guid != $article_guid) {
-								$need_saving = true;
-								$this->rewrite_duplicate($doc, $img, $api_mode);
-							}
+						if ($test_guid != $article_guid) {
+							$need_saving = true;
+							$this->rewrite_duplicate($doc, $img, $api_mode);
 						}
 					}
 				}
@@ -508,23 +474,6 @@ class Af_Img_Phash extends Plugin {
 			WHERE created_at < ".$this->interval_days($this->data_max_age));
 	}
 
-	/**
-	 * @param string $src
-	 * @param array<string> $domains_list
-	 * @return bool
-	 */
-	private function check_src_domain(string $src, array $domains_list) : bool {
-		$src_domain = parse_url($src, PHP_URL_HOST);
-
-		foreach ($domains_list as $domain) {
-			if (strstr($src_domain, $domain) !== false) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	private function guid_to_article_title(string $article_guid, int $owner_uid) : string {
 		$sth = $this->pdo->prepare("SELECT feed_id, title, updated
 			FROM ttrss_entries, ttrss_user_entries
@@ -540,7 +489,7 @@ class Af_Img_Phash extends Plugin {
 
 			$article_title = $this->T_sprintf("%s (%s) %s",
 				"<span title='$article_guid'>$article_title</span>",
-				make_local_datetime($updated, true),
+				TimeHelper::make_local_datetime($updated, true),
 				"<a href='#' onclick='Feeds.open({feed: $feed_id})'><i class='material-icons'>rss_feed</i></a>");
 
 		} else {
