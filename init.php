@@ -276,7 +276,21 @@ class Af_Img_Phash extends Plugin {
 					Debug::log("phash: url already stored, not processing", Debug::LOG_VERBOSE);
 					continue;
 				} else {
-					Debug::log("phash: processing URL...", Debug::LOG_VERBOSE);
+					Debug::log("phash: probing content type...", Debug::LOG_VERBOSE);
+
+					$content_type = $this->get_content_type($src);
+
+					Debug::log("phash: content type: $content_type", Debug::LOG_VERBOSE);
+
+					if (strpos($content_type, "image/") === FALSE) {
+						Debug::log("phash: received content type is not an image, marking as processed and skipping.", Debug::LOG_VERBOSE);
+
+						$sth = $this->pdo->prepare("INSERT INTO
+									ttrss_plugin_img_phash_urls (url, article_guid, owner_uid, phash) VALUES
+									(?, ?, ?, ?)");
+						$sth->execute([$src, $article_guid, $owner_uid, '-1']);
+						continue;
+					}
 
 					$cached_file = sha1($src);
 					$cached_file_flag = "$cached_file.phash-flag";
@@ -433,6 +447,7 @@ class Af_Img_Phash extends Plugin {
 
 				$sth = $this->pdo->prepare("SELECT phash FROM ttrss_plugin_img_phash_urls WHERE
 					owner_uid = ? AND
+					phash != -1 AND
 					url = ? LIMIT 1");
 				$sth->execute([$owner_uid, $src]);
 
@@ -518,6 +533,7 @@ class Af_Img_Phash extends Plugin {
 
 		$sth = $this->pdo->prepare("SELECT phash FROM ttrss_plugin_img_phash_urls WHERE
 			owner_uid = ? AND
+			phash != -1 AND
 			url = ? LIMIT 1");
 		$sth->execute([$owner_uid, $url]);
 
@@ -620,4 +636,29 @@ class Af_Img_Phash extends Plugin {
 			return "bit_count('$phash' ^ phash)";
 		}
 	}
+
+	/** $useragent defaults to Config::get_user_agent() */
+	private function get_header(string $url, int $header, string $useragent = "") : string {
+		$ret = "";
+
+		if (function_exists("curl_init")) {
+			$ch = curl_init($url);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_HEADER, true);
+			curl_setopt($ch, CURLOPT_NOBODY, true);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, !ini_get("open_basedir"));
+			curl_setopt($ch, CURLOPT_USERAGENT, $useragent ? $useragent : Config::get_user_agent());
+
+			@curl_exec($ch);
+			$ret = curl_getinfo($ch, $header);
+		}
+
+		return $ret;
+	}
+
+	private function get_content_type(string $url, string $useragent = "") : string {
+		return $this->get_header($url, CURLINFO_CONTENT_TYPE, $useragent);
+	}
+
 }
