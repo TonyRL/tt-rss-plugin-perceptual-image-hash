@@ -297,10 +297,12 @@ class Af_Img_Phash extends Plugin {
 
 					if ($this->cache->is_writable()) {
 
-						// check for .flag & create it
+						// check for .flag to prevent repeated failures or create it
 						if ($this->cache->exists($cached_file_flag)) {
 							Debug::log("phash: $cached_file_flag exists, looks like we failed on this URL before; skipping.", Debug::LOG_VERBOSE);
 							continue;
+						} else {
+							$this->cache->put($cached_file_flag, "");
 						}
 
 						// check for local cache
@@ -325,9 +327,7 @@ class Af_Img_Phash extends Plugin {
 							Debug::log("phash: calculated perceptual hash: $hash", Debug::LOG_VERBOSE);
 
 							// we managed to process this image, it should be safe to remove the flag now
-							// @phpstan-ignore-next-line
-							if ($this->cache->is_writable() && $this->cache->exists($cached_file_flag))
-								unlink($this->cache->get_full_path($cached_file_flag));
+							$this->cache->remove($cached_file_flag);
 
 							if ($hash) {
 								$hash = base_convert($hash, 16, 10);
