@@ -36,7 +36,6 @@ class Af_Img_Phash extends Plugin {
 
 	function save() : void {
 		$similarity = (int) $_POST["similarity"];
-		$domains_list = $_POST["domains_list"];
 
 		$enable_globally = checkbox_to_sql_bool($_POST["phash_enable_globally"]);
 
@@ -44,9 +43,8 @@ class Af_Img_Phash extends Plugin {
 
 		$this->host->set($this, "similarity", $similarity);
 		$this->host->set($this, "enable_globally", $enable_globally);
-		$this->host->set($this, "domains_list", $domains_list);
 
-		echo $this->T_sprintf("Data saved (%s, %s, %d)", $similarity, $domains_list, $enable_globally);
+		echo $this->__("Data saved.");
 	}
 
 	function init($host) {
