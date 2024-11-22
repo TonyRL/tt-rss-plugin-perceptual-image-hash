@@ -1,85 +1,50 @@
-<?php return array (
-  'root' => 
-  array (
-    'pretty_version' => 'dev-master',
-    'version' => 'dev-master',
-    'aliases' => 
-    array (
+<?php return array(
+    'root' => array(
+        'name' => '__root__',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'fe9d59d6cd437362f2de59cfc9158014d8ce00da',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
     ),
-    'reference' => '4d8becbdc28c604e4ffbe71d959353effc5ccc41',
-    'name' => '__root__',
-  ),
-  'versions' => 
-  array (
-    '__root__' => 
-    array (
-      'pretty_version' => 'dev-master',
-      'version' => 'dev-master',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '4d8becbdc28c604e4ffbe71d959353effc5ccc41',
+    'versions' => array(
+        '__root__' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'fe9d59d6cd437362f2de59cfc9158014d8ce00da',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'intervention/gif' => array(
+            'pretty_version' => '4.2.0',
+            'version' => '4.2.0.0',
+            'reference' => '42c131a31b93c440ad49061b599fa218f06f93be',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../intervention/gif',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'intervention/image' => array(
+            'pretty_version' => '3.9.1',
+            'version' => '3.9.1.0',
+            'reference' => 'b496d1f6b9f812f96166623358dfcafb8c3b1683',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../intervention/image',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'jenssegers/imagehash' => array(
+            'pretty_version' => 'v0.10.0',
+            'version' => '0.10.0.0',
+            'reference' => '643d8d676c5cbe637199206476015e36548841f0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../jenssegers/imagehash',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
     ),
-    'guzzlehttp/psr7' => 
-    array (
-      'pretty_version' => '1.7.0',
-      'version' => '1.7.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '53330f47520498c0ae1f61f7e2c90f55690c06a3',
-    ),
-    'intervention/image' => 
-    array (
-      'pretty_version' => '2.5.1',
-      'version' => '2.5.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'abbf18d5ab8367f96b3205ca3c89fb2fa598c69e',
-    ),
-    'jenssegers/imagehash' => 
-    array (
-      'pretty_version' => 'v0.7.0',
-      'version' => '0.7.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '3f3c6d990f556b0bd5997caa10218faa03a7553c',
-    ),
-    'phpseclib/phpseclib' => 
-    array (
-      'pretty_version' => '2.0.30',
-      'version' => '2.0.30.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '136b9ca7eebef78be14abf90d65c5e57b6bc5d36',
-    ),
-    'psr/http-message' => 
-    array (
-      'pretty_version' => '1.0.1',
-      'version' => '1.0.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'f6561bf28d520154e4b0ec72be95418abe6d9363',
-    ),
-    'psr/http-message-implementation' => 
-    array (
-      'provided' => 
-      array (
-        0 => '1.0',
-      ),
-    ),
-    'ralouphie/getallheaders' => 
-    array (
-      'pretty_version' => '3.0.3',
-      'version' => '3.0.3.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '120b605dfeb996808c31b6477290a714d356e822',
-    ),
-  ),
 );
