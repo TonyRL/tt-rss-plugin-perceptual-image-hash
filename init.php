@@ -642,7 +642,7 @@ class Af_Img_Phash extends Plugin {
 		if (function_exists("curl_init")) {
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			curl_setopt($ch, CURLOPT_NOBODY, true);
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, !ini_get("open_basedir"));

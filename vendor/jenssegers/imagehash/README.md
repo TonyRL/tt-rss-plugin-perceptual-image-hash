@@ -20,7 +20,7 @@ This code was inspired/based on:
 Requirements
 ------------
 
- - PHP 7.1 or higher
+ - PHP 8.1 or higher
  - The [gd](http://php.net/manual/en/book.image.php) or [imagick](http://php.net/manual/en/book.imagick.php) extension
  - Optionally, install the [GMP](http://php.net/manual/en/book.gmp.php) extension for faster fingerprint comparisons
 
@@ -38,10 +38,10 @@ Usage
 
 The library comes with 4 built-in hashing implementations:
 
- - `Jenssegers\ImageHash\Implementation\AverageHash` - Hash based the average image color
- - `Jenssegers\ImageHash\Implementation\DifferenceHash` - Hash based on the previous pixel
-  - `Jenssegers\ImageHash\Implementation\BlockHash` - Hash based on blockhash.io **Still under development**
- - `Jenssegers\ImageHash\Implementation\PerceptualHash` - The original pHash **Still under development**
+ - `Jenssegers\ImageHash\Implementations\AverageHash` - Hash based the average image color
+ - `Jenssegers\ImageHash\Implementations\DifferenceHash` - Hash based on the previous pixel
+ - `Jenssegers\ImageHash\Implementations\BlockHash` - Hash based on blockhash.io **Still under development**
+ - `Jenssegers\ImageHash\Implementations\PerceptualHash` - The original pHash **Still under development**
 
 Choose one of these implementations. If you don't know which one to use, try the `DifferenceHash` implementation. Some implementations allow some configuration, be sure to check the constructor.
 
@@ -71,8 +71,9 @@ The `Hash` object can return the internal binary hash in a couple of different f
 
 ```php
 echo $hash->toHex(); // 7878787c7c707c3c
-echo $hash->toBin(); // 0111100001111000011110000111110001111100011100000111110000111100
+echo $hash->toBits(); // 0111100001111000011110000111110001111100011100000111110000111100
 echo $hash->toInt(); // 8680820757815655484
+echo $hash->toBytes(); // "\x0F\x07ƒƒ\x03\x0F\x07\x00"
 ```
 
 Choose your preference for storing your hashes in your database. If you want to reconstruct a `Hash` object from a previous calculated value, use:
