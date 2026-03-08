@@ -605,7 +605,7 @@ class Af_Img_Phash extends Plugin {
 	}
 
 	private function bitcount_func(string $phash) : string {
-		return "bit_count(('$phash' # phash)::bit(64))";
+		return "bit_count((($phash)::bigint # phash)::bit(64))";
 	}
 
 	/** $useragent defaults to Config::get_user_agent() */
