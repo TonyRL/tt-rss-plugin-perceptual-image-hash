@@ -20,7 +20,6 @@ class GifDataStreamDecoder extends AbstractDecoder
      * Decode current source to GifDataStream
      *
      * @throws DecoderException
-     * @return GifDataStream
      */
     public function decode(): GifDataStream
     {
@@ -41,8 +40,8 @@ class GifDataStreamDecoder extends AbstractDecoder
             );
         }
 
-        while ($this->viewNextByte() != Trailer::MARKER) {
-            match ($this->viewNextBytes(2)) {
+        while ($this->viewNextByteOrFail() !== Trailer::MARKER) {
+            match ($this->viewNextBytesOrFail(2)) {
                 // trailing "global" comment blocks which are not part of "FrameBlock"
                 AbstractExtension::MARKER . CommentExtension::LABEL
                 => $gif->addComment(

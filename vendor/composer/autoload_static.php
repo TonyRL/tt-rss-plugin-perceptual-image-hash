@@ -7,11 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInit234f2fa9866f60574a85e5003848d07d
 {
     public static $prefixLengthsPsr4 = array (
-        'J' => 
+        'J' =>
         array (
             'Jenssegers\\ImageHash\\' => 21,
         ),
-        'I' => 
+        'I' =>
         array (
             'Intervention\\Image\\' => 19,
             'Intervention\\Gif\\' => 17,
@@ -19,15 +19,15 @@ class ComposerStaticInit234f2fa9866f60574a85e5003848d07d
     );
 
     public static $prefixDirsPsr4 = array (
-        'Jenssegers\\ImageHash\\' => 
+        'Jenssegers\\ImageHash\\' =>
         array (
             0 => __DIR__ . '/..' . '/jenssegers/imagehash/src',
         ),
-        'Intervention\\Image\\' => 
+        'Intervention\\Image\\' =>
         array (
             0 => __DIR__ . '/..' . '/intervention/image/src',
         ),
-        'Intervention\\Gif\\' => 
+        'Intervention\\Gif\\' =>
         array (
             0 => __DIR__ . '/..' . '/intervention/gif/src',
         ),
@@ -93,6 +93,7 @@ class ComposerStaticInit234f2fa9866f60574a85e5003848d07d
         'Intervention\\Gif\\Exceptions\\EncoderException' => __DIR__ . '/..' . '/intervention/gif/src/Exceptions/EncoderException.php',
         'Intervention\\Gif\\Exceptions\\FormatException' => __DIR__ . '/..' . '/intervention/gif/src/Exceptions/FormatException.php',
         'Intervention\\Gif\\Exceptions\\NotReadableException' => __DIR__ . '/..' . '/intervention/gif/src/Exceptions/NotReadableException.php',
+        'Intervention\\Gif\\Exceptions\\RuntimeException' => __DIR__ . '/..' . '/intervention/gif/src/Exceptions/RuntimeException.php',
         'Intervention\\Gif\\GifDataStream' => __DIR__ . '/..' . '/intervention/gif/src/GifDataStream.php',
         'Intervention\\Gif\\Splitter' => __DIR__ . '/..' . '/intervention/gif/src/Splitter.php',
         'Intervention\\Gif\\Traits\\CanDecode' => __DIR__ . '/..' . '/intervention/gif/src/Traits/CanDecode.php',
@@ -153,6 +154,7 @@ class ComposerStaticInit234f2fa9866f60574a85e5003848d07d
         'Intervention\\Image\\Drivers\\AbstractDriver' => __DIR__ . '/..' . '/intervention/image/src/Drivers/AbstractDriver.php',
         'Intervention\\Image\\Drivers\\AbstractEncoder' => __DIR__ . '/..' . '/intervention/image/src/Drivers/AbstractEncoder.php',
         'Intervention\\Image\\Drivers\\AbstractFontProcessor' => __DIR__ . '/..' . '/intervention/image/src/Drivers/AbstractFontProcessor.php',
+        'Intervention\\Image\\Drivers\\AbstractFrame' => __DIR__ . '/..' . '/intervention/image/src/Drivers/AbstractFrame.php',
         'Intervention\\Image\\Drivers\\Gd\\Analyzers\\ColorspaceAnalyzer' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Gd/Analyzers/ColorspaceAnalyzer.php',
         'Intervention\\Image\\Drivers\\Gd\\Analyzers\\HeightAnalyzer' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Gd/Analyzers/HeightAnalyzer.php',
         'Intervention\\Image\\Drivers\\Gd\\Analyzers\\PixelColorAnalyzer' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Gd/Analyzers/PixelColorAnalyzer.php',
@@ -291,6 +293,7 @@ class ComposerStaticInit234f2fa9866f60574a85e5003848d07d
         'Intervention\\Image\\Drivers\\Imagick\\Modifiers\\ScaleModifier' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Imagick/Modifiers/ScaleModifier.php',
         'Intervention\\Image\\Drivers\\Imagick\\Modifiers\\SharpenModifier' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Imagick/Modifiers/SharpenModifier.php',
         'Intervention\\Image\\Drivers\\Imagick\\Modifiers\\SliceAnimationModifier' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Imagick/Modifiers/SliceAnimationModifier.php',
+        'Intervention\\Image\\Drivers\\Imagick\\Modifiers\\StripMetaModifier' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Imagick/Modifiers/StripMetaModifier.php',
         'Intervention\\Image\\Drivers\\Imagick\\Modifiers\\TextModifier' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Imagick/Modifiers/TextModifier.php',
         'Intervention\\Image\\Drivers\\Imagick\\Modifiers\\TrimModifier' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Imagick/Modifiers/TrimModifier.php',
         'Intervention\\Image\\Drivers\\Specializable' => __DIR__ . '/..' . '/intervention/image/src/Drivers/Specializable.php',

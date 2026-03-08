@@ -4,31 +4,27 @@ declare(strict_types=1);
 
 namespace Intervention\Gif\Decoders;
 
+use Intervention\Gif\Exceptions\DecoderException;
+
 abstract class AbstractDecoder
 {
     /**
      * Decode current source
-     *
-     * @return mixed
      */
     abstract public function decode(): mixed;
 
     /**
      * Create new instance
-     *
-     * @param resource $handle
-     * @param null|int $length
      */
-    public function __construct(protected $handle, protected ?int $length = null)
+    public function __construct(protected mixed $handle, protected ?int $length = null)
     {
+        //
     }
 
     /**
      * Set source to decode
-     *
-     * @param resource $handle
      */
-    public function setHandle($handle): self
+    public function setHandle(mixed $handle): self
     {
         $this->handle = $handle;
 
@@ -38,23 +34,30 @@ abstract class AbstractDecoder
     /**
      * Read given number of bytes and move file pointer
      *
-     * @param int $length
-     * @return string
+     * @throws DecoderException
      */
-    protected function getNextBytes(int $length): string
+    protected function getNextBytesOrFail(int $length): string
     {
-        return fread($this->handle, $length);
+        if ($length < 1) {
+            throw new DecoderException('The length passed must be at least one byte.');
+        }
+
+        $bytes = fread($this->handle, $length);
+        if ($bytes === false || strlen($bytes) !== $length) {
+            throw new DecoderException('Unexpected end of file.');
+        }
+
+        return $bytes;
     }
 
     /**
      * Read given number of bytes and move pointer back to previous position
      *
-     * @param int $length
-     * @return string
+     * @throws DecoderException
      */
-    protected function viewNextBytes(int $length): string
+    protected function viewNextBytesOrFail(int $length): string
     {
-        $bytes = $this->getNextBytes($length);
+        $bytes = $this->getNextBytesOrFail($length);
         $this->movePointer($length * -1);
 
         return $bytes;
@@ -63,17 +66,15 @@ abstract class AbstractDecoder
     /**
      * Read next byte and move pointer back to previous position
      *
-     * @return string
+     * @throws DecoderException
      */
-    protected function viewNextByte(): string
+    protected function viewNextByteOrFail(): string
     {
-        return $this->viewNextBytes(1);
+        return $this->viewNextBytesOrFail(1);
     }
 
     /**
      * Read all remaining bytes from file handler
-     *
-     * @return string
      */
     protected function getRemainingBytes(): string
     {
@@ -89,18 +90,15 @@ abstract class AbstractDecoder
     /**
      * Get next byte in stream and move file pointer
      *
-     * @return string
+     * @throws DecoderException
      */
-    protected function getNextByte(): string
+    protected function getNextByteOrFail(): string
     {
-        return $this->getNextBytes(1);
+        return $this->getNextBytesOrFail(1);
     }
 
     /**
      * Move file pointer on handle by given offset
-     *
-     * @param int $offset
-     * @return self
      */
     protected function movePointer(int $offset): self
     {
@@ -112,17 +110,21 @@ abstract class AbstractDecoder
     /**
      * Decode multi byte value
      *
-     * @return int
+     * @throws DecoderException
      */
     protected function decodeMultiByte(string $bytes): int
     {
-        return unpack('v*', $bytes)[1];
+        $unpacked = unpack('v*', $bytes);
+
+        if ($unpacked === false || !array_key_exists(1, $unpacked)) {
+            throw new DecoderException('Unable to decode given bytes.');
+        }
+
+        return $unpacked[1];
     }
 
     /**
      * Set length
-     *
-     * @param int $length
      */
     public function setLength(int $length): self
     {
@@ -133,8 +135,6 @@ abstract class AbstractDecoder
 
     /**
      * Get length
-     *
-     * @return null|int
      */
     public function getLength(): ?int
     {
@@ -144,10 +144,16 @@ abstract class AbstractDecoder
     /**
      * Get current handle position
      *
-     * @return int
+     * @throws DecoderException
      */
     public function getPosition(): int
     {
-        return ftell($this->handle);
+        $position = ftell($this->handle);
+
+        if ($position === false) {
+            throw new DecoderException('Unable to read current position from handle.');
+        }
+
+        return $position;
     }
 }

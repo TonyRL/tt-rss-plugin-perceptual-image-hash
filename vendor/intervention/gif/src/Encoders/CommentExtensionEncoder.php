@@ -10,8 +10,6 @@ class CommentExtensionEncoder extends AbstractEncoder
 {
     /**
      * Create new decoder instance
-     *
-     * @param CommentExtension $source
      */
     public function __construct(CommentExtension $source)
     {
@@ -20,8 +18,6 @@ class CommentExtensionEncoder extends AbstractEncoder
 
     /**
      * Encode current source
-     *
-     * @return string
      */
     public function encode(): string
     {
@@ -35,12 +31,10 @@ class CommentExtensionEncoder extends AbstractEncoder
 
     /**
      * Encode comment blocks
-     *
-     * @return string
      */
     protected function encodeComments(): string
     {
-        return implode('', array_map(function ($comment) {
+        return implode('', array_map(function (string $comment): string {
             return pack('C', strlen($comment)) . $comment;
         }, $this->source->getComments()));
     }

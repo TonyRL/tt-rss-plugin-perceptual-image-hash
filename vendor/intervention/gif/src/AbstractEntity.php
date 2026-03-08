@@ -8,8 +8,9 @@ use Intervention\Gif\Exceptions\EncoderException;
 use Intervention\Gif\Traits\CanDecode;
 use Intervention\Gif\Traits\CanEncode;
 use ReflectionClass;
+use Stringable;
 
-abstract class AbstractEntity
+abstract class AbstractEntity implements Stringable
 {
     use CanEncode;
     use CanDecode;
@@ -18,8 +19,6 @@ abstract class AbstractEntity
 
     /**
      * Get short classname of current instance
-     *
-     * @return string
      */
     public static function getShortClassname(): string
     {
@@ -30,7 +29,6 @@ abstract class AbstractEntity
      * Cast object to string
      *
      * @throws EncoderException
-     * @return string
      */
     public function __toString(): string
     {

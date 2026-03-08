@@ -2,29 +2,29 @@
     "packages": [
         {
             "name": "intervention/gif",
-            "version": "4.2.0",
-            "version_normalized": "4.2.0.0",
+            "version": "4.2.4",
+            "version_normalized": "4.2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Intervention/gif.git",
-                "reference": "42c131a31b93c440ad49061b599fa218f06f93be"
+                "reference": "c3598a16ebe7690cd55640c44144a9df383ea73c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Intervention/gif/zipball/42c131a31b93c440ad49061b599fa218f06f93be",
-                "reference": "42c131a31b93c440ad49061b599fa218f06f93be",
+                "url": "https://api.github.com/repos/Intervention/gif/zipball/c3598a16ebe7690cd55640c44144a9df383ea73c",
+                "reference": "c3598a16ebe7690cd55640c44144a9df383ea73c",
                 "shasum": ""
             },
             "require": {
                 "php": "^8.1"
             },
             "require-dev": {
-                "phpstan/phpstan": "^1",
-                "phpunit/phpunit": "^10.0",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^10.0 || ^11.0  || ^12.0",
                 "slevomat/coding-standard": "~8.0",
                 "squizlabs/php_codesniffer": "^3.8"
             },
-            "time": "2024-09-20T13:35:02+00:00",
+            "time": "2026-01-04T09:27:23+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -53,7 +53,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Intervention/gif/issues",
-                "source": "https://github.com/Intervention/gif/tree/4.2.0"
+                "source": "https://github.com/Intervention/gif/tree/4.2.4"
             },
             "funding": [
                 {
@@ -73,17 +73,17 @@
         },
         {
             "name": "intervention/image",
-            "version": "3.9.1",
-            "version_normalized": "3.9.1.0",
+            "version": "3.11.7",
+            "version_normalized": "3.11.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Intervention/image.git",
-                "reference": "b496d1f6b9f812f96166623358dfcafb8c3b1683"
+                "reference": "2159bcccff18f09d2a392679b81a82c5a003f9bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Intervention/image/zipball/b496d1f6b9f812f96166623358dfcafb8c3b1683",
-                "reference": "b496d1f6b9f812f96166623358dfcafb8c3b1683",
+                "url": "https://api.github.com/repos/Intervention/image/zipball/2159bcccff18f09d2a392679b81a82c5a003f9bb",
+                "reference": "2159bcccff18f09d2a392679b81a82c5a003f9bb",
                 "shasum": ""
             },
             "require": {
@@ -93,15 +93,15 @@
             },
             "require-dev": {
                 "mockery/mockery": "^1.6",
-                "phpstan/phpstan": "^1",
-                "phpunit/phpunit": "^10.0",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0",
                 "slevomat/coding-standard": "~8.0",
                 "squizlabs/php_codesniffer": "^3.8"
             },
             "suggest": {
                 "ext-exif": "Recommended to be able to read EXIF data properly."
             },
-            "time": "2024-10-27T10:15:54+00:00",
+            "time": "2026-02-19T13:11:17+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -117,11 +117,11 @@
                 {
                     "name": "Oliver Vogel",
                     "email": "oliver@intervention.io",
-                    "homepage": "https://intervention.io/"
+                    "homepage": "https://intervention.io"
                 }
             ],
-            "description": "PHP image manipulation",
-            "homepage": "https://image.intervention.io/",
+            "description": "PHP Image Processing",
+            "homepage": "https://image.intervention.io",
             "keywords": [
                 "gd",
                 "image",
@@ -132,7 +132,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Intervention/image/issues",
-                "source": "https://github.com/Intervention/image/tree/3.9.1"
+                "source": "https://github.com/Intervention/image/tree/3.11.7"
             },
             "funding": [
                 {
@@ -152,33 +152,33 @@
         },
         {
             "name": "jenssegers/imagehash",
-            "version": "v0.10.0",
-            "version_normalized": "0.10.0.0",
+            "version": "v0.11.0",
+            "version_normalized": "0.11.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jenssegers/imagehash.git",
-                "reference": "643d8d676c5cbe637199206476015e36548841f0"
+                "reference": "87ba7051d2fca2edc718091f052424474dedfeae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jenssegers/imagehash/zipball/643d8d676c5cbe637199206476015e36548841f0",
-                "reference": "643d8d676c5cbe637199206476015e36548841f0",
+                "url": "https://api.github.com/repos/jenssegers/imagehash/zipball/87ba7051d2fca2edc718091f052424474dedfeae",
+                "reference": "87ba7051d2fca2edc718091f052424474dedfeae",
                 "shasum": ""
             },
             "require": {
                 "intervention/image": "^3.3",
-                "php": "^8.1"
+                "php": "^8.2"
             },
             "require-dev": {
                 "php-coveralls/php-coveralls": "^2.0",
-                "phpunit/phpunit": "^10"
+                "phpunit/phpunit": "^11.5.3"
             },
             "suggest": {
                 "ext-gd": "GD or ImageMagick is required",
                 "ext-gmp": "GMP results in faster comparisons",
                 "ext-imagick": "GD or ImageMagick is required"
             },
-            "time": "2024-06-17T09:53:53+00:00",
+            "time": "2025-09-17T09:15:58+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -212,7 +212,7 @@
             ],
             "support": {
                 "issues": "https://github.com/jenssegers/imagehash/issues",
-                "source": "https://github.com/jenssegers/imagehash/tree/v0.10.0"
+                "source": "https://github.com/jenssegers/imagehash/tree/v0.11.0"
             },
             "funding": [
                 {
