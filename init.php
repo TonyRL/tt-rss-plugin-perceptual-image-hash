@@ -20,10 +20,10 @@ class Af_Img_Phash extends Plugin {
 
 	function about() {
 		return array(null,
-			"Filter duplicate images using perceptual hashing (requires GD)",
+			"Filter duplicate images using perceptual hashing (requires GD/Imagick)",
 			"fox",
 			false,
-			"https://dev.tt-rss.org/fox/ttrss-perceptual-image-hash/wiki");
+			"https://github.com/tt-rss/tt-rss-plugin-perceptual-image-hash");
 	}
 
 	function get_js() {
@@ -51,8 +51,6 @@ class Af_Img_Phash extends Plugin {
 		$this->host = $host;
 		$this->cache = DiskCache::instance("images");
 
-		Config::add("IMG_HASH_SQL_FUNCTION", "");
-
 		$migrations = new Db_Migrations();
 		$migrations->initialize_for_plugin($this);
 
@@ -77,18 +75,6 @@ class Af_Img_Phash extends Plugin {
 			title="<i class='material-icons'>photo</i> <?= $this->__( 'Filter similar images (af_img_phash)') ?>">
 
 			<?php
-			if (Config::get(Config::DB_TYPE) == "pgsql") {
-				if (Config::get("IMG_HASH_SQL_FUNCTION")) {
-					print_error("Using SQL implementation of bit_count; UI performance may not be as responsive as installing extension 'https://github.com/sldab/count-bits'. See README.txt");
-				}
-				else {
-					try { $res = $this->pdo->query("select 'unique_1bits'::regproc"); } catch (PDOException $e) { ; }
-					if (empty($res) || !$res->fetch()) {
-						print_error("Required function from count_bits extension not found.");
-					}
-				}
-			}
-
 			$similarity = (int) $this->host->get($this, "similarity", $this->default_similarity);
 			$enable_globally = $this->host->get($this, "enable_globally");
 
@@ -406,11 +392,6 @@ class Af_Img_Phash extends Plugin {
 	 * @throws PDOException
 	 */
 	private function _hook_render_article_cdm($article, $api_mode) {
-		/* if (Config::get(Config::DB_TYPE) == "pgsql" && !Config::get("IMG_HASH_SQL_FUNCTION")) {
-			try { $res = $this->pdo->query("select 'unique_1bits'::regproc"); } catch (PDOException $e) { ; }
-			if (empty($res) || !$res->fetch()) return $article;
-		} */
-
 		$owner_uid = $_SESSION["uid"];
 		$similarity = (int) $this->host->get($this, "similarity", $this->default_similarity);
 
@@ -539,7 +520,7 @@ class Af_Img_Phash extends Plugin {
 
 			$phash = $row['phash'];
 
-			$sth = $this->pdo->prepare("SELECT article_guid, ".SUBSTRING_FOR_DATE."(created_at,1,19) AS created_at FROM ttrss_plugin_img_phash_urls WHERE
+			$sth = $this->pdo->prepare("SELECT article_guid, SUBSTRING_FOR_DATE(created_at,1,19) AS created_at FROM ttrss_plugin_img_phash_urls WHERE
 							owner_uid = ? AND
 							created_at >= ".$this->interval_days($this->data_max_age)." AND
 							".$this->bitcount_func($phash)." <= ? ORDER BY created_at LIMIT 1");
@@ -620,19 +601,11 @@ class Af_Img_Phash extends Plugin {
 	}
 
 	private function interval_days(int $days) : string {
-		if (Config::get(Config::DB_TYPE) == "pgsql") {
-			return "NOW() - INTERVAL '$days days' ";
-		} else {
-			return "DATE_SUB(NOW(), INTERVAL $days DAY) ";
-		}
+		return "NOW() - INTERVAL '$days days' ";
 	}
 
 	private function bitcount_func(string $phash) : string {
-		if (Config::get(Config::DB_TYPE) == "pgsql") {
-			return Config::get("IMG_HASH_SQL_FUNCTION") ? "bit_count('$phash' # phash)" : "unique_1bits('$phash', phash)";
-		} else {
-			return "bit_count('$phash' ^ phash)";
-		}
+		return "bit_count((($phash)::bigint # phash)::bit(64))";
 	}
 
 	/** $useragent defaults to Config::get_user_agent() */

@@ -16,6 +16,7 @@ class ColorTable extends AbstractEntity
      */
     public function __construct(protected array $colors = [])
     {
+        //
     }
 
     /**
@@ -30,11 +31,6 @@ class ColorTable extends AbstractEntity
 
     /**
      * Add color to table
-     *
-     * @param int $r
-     * @param int $g
-     * @param int $b
-     * @return self
      */
     public function addRgb(int $r, int $g, int $b): self
     {
@@ -45,9 +41,6 @@ class ColorTable extends AbstractEntity
 
     /**
      * Add color to table
-     *
-     * @param Color $color
-     * @return self
      */
     public function addColor(Color $color): self
     {
@@ -60,7 +53,6 @@ class ColorTable extends AbstractEntity
      * Reset colors to array of color objects
      *
      * @param array<Color> $colors
-     * @return self
      */
     public function setColors(array $colors): self
     {
@@ -74,8 +66,6 @@ class ColorTable extends AbstractEntity
 
     /**
      * Count colors of current instance
-     *
-     * @return int
      */
     public function countColors(): int
     {
@@ -84,8 +74,6 @@ class ColorTable extends AbstractEntity
 
     /**
      * Determine if any colors are present on the current table
-     *
-     * @return bool
      */
     public function hasColors(): bool
     {
@@ -94,8 +82,6 @@ class ColorTable extends AbstractEntity
 
     /**
      * Empty color table
-     *
-     * @return self
      */
     public function empty(): self
     {
@@ -106,42 +92,23 @@ class ColorTable extends AbstractEntity
 
     /**
      * Get size of color table in logical screen descriptor
-     *
-     * @return int
      */
     public function getLogicalSize(): int
     {
-        switch ($this->countColors()) {
-            case 4:
-                return 1;
-
-            case 8:
-                return 2;
-
-            case 16:
-                return 3;
-
-            case 32:
-                return 4;
-
-            case 64:
-                return 5;
-
-            case 128:
-                return 6;
-
-            case 256:
-                return 7;
-
-            default:
-                return 0;
-        }
+        return match ($this->countColors()) {
+            4 => 1,
+            8 => 2,
+            16 => 3,
+            32 => 4,
+            64 => 5,
+            128 => 6,
+            256 => 7,
+            default => 0,
+        };
     }
 
     /**
      * Calculate the number of bytes contained by the current table
-     *
-     * @return int
      */
     public function getByteSize(): int
     {

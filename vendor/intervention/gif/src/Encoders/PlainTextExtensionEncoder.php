@@ -10,8 +10,6 @@ class PlainTextExtensionEncoder extends AbstractEncoder
 {
     /**
      * Create new instance
-     *
-     * @param PlainTextExtension $source
      */
     public function __construct(PlainTextExtension $source)
     {
@@ -20,8 +18,6 @@ class PlainTextExtensionEncoder extends AbstractEncoder
 
     /**
      * Encode current source
-     *
-     * @return string
      */
     public function encode(): string
     {
@@ -40,8 +36,6 @@ class PlainTextExtensionEncoder extends AbstractEncoder
 
     /**
      * Encode head block
-     *
-     * @return string
      */
     protected function encodeHead(): string
     {
@@ -50,13 +44,12 @@ class PlainTextExtensionEncoder extends AbstractEncoder
 
     /**
      * Encode text chunks
-     *
-     * @return string
      */
     protected function encodeTexts(): string
     {
-        return implode('', array_map(function ($text) {
-            return pack('C', strlen($text)) . $text;
-        }, $this->source->getText()));
+        return implode('', array_map(
+            fn(string $text): string => pack('C', strlen($text)) . $text,
+            $this->source->getText(),
+        ));
     }
 }

@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Intervention\Gif\Encoders;
 
+use Intervention\Gif\Blocks\CommentExtension;
+use Intervention\Gif\Blocks\FrameBlock;
+use Intervention\Gif\Exceptions\EncoderException;
 use Intervention\Gif\GifDataStream;
 
 class GifDataStreamEncoder extends AbstractEncoder
 {
     /**
      * Create new instance
-     *
-     * @param GifDataStream $source
      */
     public function __construct(GifDataStream $source)
     {
@@ -21,7 +22,7 @@ class GifDataStreamEncoder extends AbstractEncoder
     /**
      * Encode current source
      *
-     * @return string
+     * @throws EncoderException
      */
     public function encode(): string
     {
@@ -47,24 +48,26 @@ class GifDataStreamEncoder extends AbstractEncoder
     /**
      * Encode data blocks of source
      *
-     * @return string
+     * @throws EncoderException
      */
     protected function encodeFrames(): string
     {
-        return implode('', array_map(function ($frame) {
-            return $frame->encode();
-        }, $this->source->getFrames()));
+        return implode('', array_map(
+            fn(FrameBlock $frame): string => $frame->encode(),
+            $this->source->getFrames(),
+        ));
     }
 
     /**
      * Encode comment extension blocks of source
      *
-     * @return string
+     * @throws EncoderException
      */
     protected function encodeComments(): string
     {
-        return implode('', array_map(function ($commentExtension) {
-            return $commentExtension->encode();
-        }, $this->source->getComments()));
+        return implode('', array_map(
+            fn(CommentExtension $commentExtension): string => $commentExtension->encode(),
+            $this->source->getComments()
+        ));
     }
 }
